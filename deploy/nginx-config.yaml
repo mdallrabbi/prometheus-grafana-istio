@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: monitoring
+data:
+  default.conf: |
+    server {
+        listen       80;
+        server_name  _;
+
+        location / {
+            proxy_pass http://grafana.monitoring.svc.cluster.local:3000/;
+        }
+
+        location /dir/ {
+            proxy_pass http://localhost;
+        }
+
+        # Add any other configuration as needed
+    }
+

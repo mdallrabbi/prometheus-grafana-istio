@@ -1,0 +1,55 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: grafana-gateway
+  namespace: monitoring
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+    - 139.177.184.147
+    - 139.162.15.60
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  hosts:
+  - 139.177.184.147
+  - 139.162.15.60
+  gateways:
+  - grafana-gateway
+  http:
+  - match:
+    - uri:
+        prefix: / # Modify the prefix according to your desired URL path
+    route:
+    - destination:
+        host: grafana.monitoring.svc.cluster.local
+        port:
+          number: 3000
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: grafana-destination-rule-monitoring
+  namespace: monitoring
+spec:
+  host: grafana.monitoring.svc.cluster.local # Replace with the actual service name and namespace of Grafana
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN # You can adjust the load balancing policy as needed
+---
